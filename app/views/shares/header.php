@@ -164,7 +164,7 @@
 
 
     <nav class="navbar navbar-expand-lg">
-        <a class="navbar-brand" href="/">
+        <a class="navbar-brand" href="/webbanhang">
             <img src="/webbanhang/public/images/LOGO.png" alt="Logo" width="50">
         </a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
@@ -185,13 +185,19 @@
                         <a class="nav-link" href="/webbanhang/Category">Danh mục</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/webbanhang/views/orders/history.php">Lịch sử đơn hàng </a>
+                        <a class="nav-link" href="/webbanhang/order/history">Lịch sử đơn hàng</a>
                     </li>
+                <?php else: ?>
+                    <?php if (SessionHelper::isLoggedIn()): ?>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/webbanhang/order/history">Lịch sử đơn hàng</a>
+                        </li>
+                    <?php endif; ?>
                 <?php endif; ?>
                 <li class="nav-item">
                     <?php
                     if (SessionHelper::isLoggedIn()) {
-                        echo "<a class='nav-link'>" . htmlspecialchars($_SESSION['username']) . "(" . SessionHelper::getRole() . ")</a>";
+                        echo "<a class='nav-link' href='/webbanhang/account/profile'>" . htmlspecialchars($_SESSION['username']) . "(" . SessionHelper::getRole() . ")</a>";
                     } else {
                         echo "<a class='nav-link' href='/webbanhang/account/login'>Đăng nhập</a>";
                     }

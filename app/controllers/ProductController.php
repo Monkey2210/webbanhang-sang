@@ -331,36 +331,49 @@ class ProductController
     }
 
 
-    public function updateCart()
+    public function updateCartAjax()
     {
-        session_start();
+        if (isset($_GET['product_id']) && isset($_GET['action'])) {
+            $product_id = $_GET['product_id'];
+            $action = $_GET['action'];
 
-        // Kiểm tra giỏ hàng
-        if (!isset($_SESSION['cart'])) {
-            $_SESSION['cart'] = [];
+            if (!isset($_SESSION['cart'][$product_id])) {
+                echo json_encode(['success' => false]);
+                return;
+            }
+
+            if ($action === 'increase') {
+                $_SESSION['cart'][$product_id]['quantity']++;
+            } else if ($action === 'decrease' && $_SESSION['cart'][$product_id]['quantity'] > 1) {
+                $_SESSION['cart'][$product_id]['quantity']--;
+            }
+
+            // Tính tổng tiền mới
+            $totalPrice = 0;
+            foreach ($_SESSION['cart'] as $item) {
+                $totalPrice += $item['quantity'] * $item['price'];
+            }
+
+            echo json_encode([
+                'success' => true,
+                'quantity' => $_SESSION['cart'][$product_id]['quantity'],
+                'totalPrice' => number_format($totalPrice, 0, ',', '.')
+            ]);
+            return;
         }
 
-        // Lấy dữ liệu từ request
-        $product_id = $_GET['product_id'] ?? null;
-        $action = $_GET['action'] ?? null;
+        echo json_encode(['success' => false]);
+    }
 
-        if (!$product_id || !isset($_SESSION['cart'][$product_id])) {
-            header("Location: /webbanhang/Product/cart");
-            exit();
-        }
-
-        // Tăng/giảm số lượng sản phẩm
-        if ($action === 'increase') {
-            $_SESSION['cart'][$product_id]['quantity']++;
-        } elseif ($action === 'decrease') {
-            $_SESSION['cart'][$product_id]['quantity']--;
-            if ($_SESSION['cart'][$product_id]['quantity'] <= 0) {
-                unset($_SESSION['cart'][$product_id]); // Xóa sản phẩm nếu số lượng về 0
+    public function removeCart()
+    {
+        if (isset($_GET['product_id'])) {
+            $product_id = $_GET['product_id'];
+            if (isset($_SESSION['cart'][$product_id])) {
+                unset($_SESSION['cart'][$product_id]);
             }
         }
-
-        // Chuyển hướng trở lại giỏ hàng
-        header("Location: /webbanhang/Product/cart");
-        exit();
+        header('Location: /webbanhang/Product/cart');
+        exit;
     }
 }

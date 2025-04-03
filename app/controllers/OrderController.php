@@ -15,39 +15,36 @@ class OrderController
 
     public function history()
     {
-        SessionHelper::start();
-        if (!SessionHelper::isUser()) {
+        if (!SessionHelper::isLoggedIn()) {
             header('Location: /webbanhang/account/login');
             exit;
         }
 
-        $userId = $_SESSION['user_id']; // Lấy ID user từ session
-        $orders = $this->orderModel->getOrdersByUserId($userId);
+        $username = $_SESSION['username'];
+        $orders = $this->orderModel->getOrdersByUsername($username);
 
-        include 'app/views/order/history.php';
+        foreach ($orders as $order) {
+            $order->items = $this->orderModel->getOrderItems($order->id);
+        }
+
+        include 'app/views/orders/history.php';
     }
 
-    public function details($orderId)
+    public function detail($orderId)
     {
-        SessionHelper::start();
-        if (!SessionHelper::isUser()) {
+        if (!SessionHelper::isLoggedIn()) {
             header('Location: /webbanhang/account/login');
-            exit;
-        }
-
-        if (!isset($_SESSION['user_id'])) {
-            echo "Lỗi: Không tìm thấy user_id trong session!";
-            exit;
+            return;
         }
 
         $userId = $_SESSION['user_id'];
-        $order = $this->orderModel->getOrderDetails($orderId, $userId);
+        $order = $this->orderModel->getOrderDetail($orderId, $userId);
 
         if (!$order) {
-            echo "Lỗi: Không tìm thấy đơn hàng hoặc bạn không có quyền xem!";
-            exit;
+            header('Location: /webbanhang/Order/history');
+            return;
         }
 
-        include 'app/views/order/details.php';
+        include 'app/views/orders/detail.php';
     }
 }

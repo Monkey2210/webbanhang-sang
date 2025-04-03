@@ -1,45 +1,40 @@
 <?php
 class OrderModel
 {
-    private $conn;
-    private $table_orders = "orders";
-    private $table_order_items = "order_items";
+    private $db;
 
     public function __construct($db)
     {
-        $this->conn = $db;
+        $this->db = $db;
     }
 
-    // Lấy danh sách đơn hàng của user
-    public function getOrdersByUserId($userId)
+    public function getOrdersByUsername($username)
     {
-        $query = "SELECT * FROM " . $this->table_orders . " WHERE user_id = :user_id ORDER BY created_at DESC";
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $query = "SELECT o.*, a.username, a.role
+                 FROM orders o, account a 
+                 WHERE a.username = ? 
+                 ORDER BY o.created_at DESC";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([$username]);
+        return $stmt->fetchAll(PDO::FETCH_OBJ);
     }
 
-
-    // Lấy chi tiết sản phẩm trong đơn hàng
     public function getOrderItems($orderId)
     {
-        $query = "SELECT oi.*, p.name AS product_name FROM " . $this->table_order_items . " oi
-                  JOIN products p ON oi.product_id = p.id
-                  WHERE oi.order_id = :order_id";
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':order_id', $orderId, PDO::PARAM_INT);
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $query = "SELECT od.*, p.name as product_name 
+                 FROM order_details od 
+                 JOIN product p ON od.product_id = p.id 
+                 WHERE od.order_id = ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([$orderId]);
+        return $stmt->fetchAll(PDO::FETCH_OBJ);
     }
-    public function getOrderDetails($orderId, $userId)
-    {
-        $query = "SELECT * FROM orders WHERE id = :orderId AND user_id = :userId";
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':orderId', $orderId, PDO::PARAM_INT);
-        $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
-        $stmt->execute();
 
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+    public function getOrderDetail($orderId, $userId)
+    {
+        $query = "SELECT * FROM orders WHERE id = ? AND user_id = ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([$orderId, $userId]);
+        return $stmt->fetch(PDO::FETCH_OBJ);
     }
 }

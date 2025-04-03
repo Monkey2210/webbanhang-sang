@@ -148,51 +148,43 @@ class AccountController
         }
     }
 
-    public function resetpassword()
-    {
-        if ($_SERVER["REQUEST_METHOD"] == "POST") {
-            $username = $_POST['username'];
 
-            // Gọi từ AccountModel thay vì từ Database
-            $user = $this->accountModel->getUserByUsername($username);
-
-            if ($user) {
-                $_SESSION['reset_user'] = $username;
-                header("Location: /webbanhang/account/newpassword");
-                exit();
-            } else {
-                $errors[] = "Username không tồn tại!";
-                include 'app/views/account/forgotpassword.php';
-            }
-        }
-    }
 
 
     public function updatepassword()
     {
-        if ($_SERVER["REQUEST_METHOD"] == "POST") {
-            if (!isset($_SESSION['reset_user'])) {
-                header("Location: /webbanhang/account/forgotpassword");
-                exit();
-            }
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $newpassword = $_POST['newpassword'] ?? '';
+            $confirmpassword = $_POST['confirmpassword'] ?? '';
 
-            $username = $_SESSION['reset_user'];
-            $newpassword = $_POST['newpassword'];
-            $confirmpassword = $_POST['confirmpassword'];
-
-            if ($newpassword !== $confirmpassword) {
-                $errors[] = "Mật khẩu nhập lại không khớp!";
+            if (empty($newpassword) || empty($confirmpassword)) {
+                $errors[] = "Vui lòng nhập đầy đủ thông tin";
                 include 'app/views/account/newpassword.php';
                 return;
             }
 
-            // Gọi từ AccountModel thay vì từ Database
-            $this->accountModel->updatePassword($username, password_hash($newpassword, PASSWORD_DEFAULT));
+            if ($newpassword !== $confirmpassword) {
+                $errors[] = "Mật khẩu xác nhận không khớp";
+                include 'app/views/account/newpassword.php';
+                return;
+            }
 
-            unset($_SESSION['reset_user']);
-            header("Location: /webbanhang/account/login");
-            exit();
+            $username = $_SESSION['reset_username'] ?? '';
+            if (empty($username)) {
+                header('Location: /webbanhang/account/login');
+                return;
+            }
+
+            $hashedPassword = password_hash($newpassword, PASSWORD_DEFAULT);
+            $this->accountModel->updatePassword($username, $hashedPassword);
+
+            unset($_SESSION['reset_username']);
+            $_SESSION['success_message'] = "Đổi mật khẩu thành công";
+            header('Location: /webbanhang/account/login');
+            exit;
         }
+
+        include 'app/views/account/newpassword.php';
     }
 
 
@@ -201,14 +193,52 @@ class AccountController
         include 'app/views/account/forgotpassword.php';
     }
 
+
+    public function resetpassword()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $username = $_POST['username'] ?? '';
+
+            if (empty($username)) {
+                $errors[] = "Vui lòng nhập tên đăng nhập";
+                include 'app/views/account/forgotpassword.php';
+                return;
+            }
+
+            $user = $this->accountModel->getUserByUsername($username);
+
+            if (!$user) {
+                $errors[] = "Tên đăng nhập không tồn tại";
+                include 'app/views/account/forgotpassword.php';
+                return;
+            }
+
+            // Sử dụng tên biến session nhất quán
+            $_SESSION['reset_username'] = $username;
+
+            header('Location: /webbanhang/account/newpassword');
+            exit;
+        }
+
+        header('Location: /webbanhang/account/forgotpassword');
+    }
+
+    // Sửa lại phương thức verify để sử dụng cùng tên biến session
     public function verify()
     {
-        if (!isset($_SESSION['reset_user'])) {
+        if (!isset($_SESSION['reset_username'])) {
             header("Location: /webbanhang/account/forgotpassword");
             exit();
         }
 
-        // Hiển thị trang xác nhận
         include 'app/views/account/verify.php';
+    }
+    public function profile()
+    {
+        if (!SessionHelper::isLoggedIn()) {
+            header('Location: /webbanhang/account/login');
+            exit;
+        }
+        include 'app/views/account/profile.php';
     }
 }

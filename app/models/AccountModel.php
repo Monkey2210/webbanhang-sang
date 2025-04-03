@@ -44,7 +44,7 @@ class AccountModel
     //kiểm tra username có tồn tài không (dùng cho reset password)
     public function getUserByUsername($username)
     {
-        $query = "SELECT * FROM users WHERE username = :username";
+        $query = "SELECT * FROM account WHERE username = :username";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':username', $username);
         $stmt->execute();

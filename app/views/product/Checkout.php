@@ -14,7 +14,9 @@
         <textarea id="address" name="address" class="form-control"
             required></textarea>
     </div>
-    <button type="submit" class="btn btn-primary">Thanh toán</button>
+    <div class="mt-3">
+        <button type="submit" class="btn btn-primary w-100">Thanh toán</button>
+        <a href="/webbanhang/Product/cart" class="btn btn-secondary w-100 mt-2">Quay lại giỏ hàng</a>
+    </div>
 </form>
-<a href="/webbanhang/Product/cart" class="btn btn-secondary mt-2">Quay lại giỏ hàng</a>
 <?php include 'app/views/shares/footer.php'; ?>

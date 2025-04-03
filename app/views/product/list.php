@@ -13,21 +13,23 @@ if (isset($_SESSION['cart'])) {
 ?>
 
 <!-- Hiển thị nút "Thêm sản phẩm" chỉ khi là Admin -->
-<?php if (SessionHelper::isAdmin()): ?>
+<!-- <?php if (SessionHelper::isAdmin()): ?>
     <a href="/webbanhang/Product/add" class="btn btn-success mb-2">Thêm sản phẩm mới</a>
-<?php endif; ?>
+<?php endif; ?> -->
 
 <div class="container">
     <div class="row">
         <?php foreach ($products as $product): ?>
             <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
                 <div class="card h-100 shadow">
-                    <?php if ($product->image): ?>
-                        <img src="/webbanhang/<?php echo htmlspecialchars($product->image, ENT_QUOTES, 'UTF-8'); ?>"
-                            class="card-img-top product-image"
-                            alt="Product Image"
-                            style="height: 250px; object-fit: cover; display: block">
-                    <?php endif; ?>
+                    <div class="image-container" style="height: 250px; overflow: hidden;">
+                        <?php if ($product->image): ?>
+                            <img src="/webbanhang/<?php echo htmlspecialchars($product->image, ENT_QUOTES, 'UTF-8'); ?>"
+                                class="card-img-top product-image"
+                                alt="Product Image"
+                                style="width: 100%; height: 100%; object-fit: contain; padding: 10px;">
+                        <?php endif; ?>
+                    </div>
                     <div class="card-body text-center">
                         <h5 class="card-title">
                             <a href="/webbanhang/Product/show/<?php echo $product->id; ?>">

@@ -34,8 +34,13 @@ class CategoryController
     }
 
     // Sửa danh mục
-    public function edit($id)
+    public function edit($id = null)
     {
+        if ($id === null) {
+            header('Location: /webbanhang/category');
+            return;
+        }
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $name = $_POST['name'] ?? '';
             if (!empty($name)) {
@@ -43,7 +48,11 @@ class CategoryController
             }
             header('Location: /webbanhang/category');
         } else {
-            $category = $this->categoryModel->getCategory();
+            $category = $this->categoryModel->getCategoryById($id);
+            if (!$category) {
+                header('Location: /webbanhang/category');
+                return;
+            }
             include 'app/views/category/edit.php';
         }
     }

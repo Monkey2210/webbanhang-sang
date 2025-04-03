@@ -1,0 +1,23 @@
+RewriteEngine On
+RewriteBase /webbanhang/
+
+# Cho phép truy cập tệp tĩnh như ảnh, CSS, JS
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Cho phép tất cả các tệp hình ảnh (jpg, jpeg, png, gif, svg, webp)
+RewriteCond %{REQUEST_URI} \.(jpg|jpeg|png|gif|svg|webp|bmp|ico)$ [NC]
+RewriteRule .* - [L]
+
+# Nếu không phải tệp hoặc thư mục, chuyển hướng về index.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
+<FilesMatch "\.(jpg|jpeg|png|gif|webp)$">
+    Allow from all
+</FilesMatch>
+RewriteCond %{REQUEST_URI} !\.(gif|jpe?g|png|svg|webp)$ [NC]
+
+RewriteRule ^webbanhang/account/newpassword$ index.php?route=account/newpassword [L,QSA]
+
